@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.custom.i18n.resources" value="messages"></constant>
+	<constant name="struts.devMode" value="false" />
+
+	<!--
+		provision system global default package, for both use of femtouser and adminuser 
+	-->
+	<package name="provision-default" extends="struts-default">
+		<result-types>
+			<result-type name="tiles"
+				class="org.apache.struts2.views.tiles.TilesResult"></result-type>
+		</result-types>
+
+		<global-results>
+			<result name="systemError" type="tiles">/error/error</result>
+		</global-results>
+		
+		<global-exception-mappings>
+			<exception-mapping result="error" exception="tw.com.mds.fet.femtocellportal.core.ServiceException" />
+			<exception-mapping result="systemError" exception="java.lang.Exception" />
+		</global-exception-mappings>
+	</package>
+
+	<!-- 
+		admin login function
+	 -->
+	<package name="login" namespace="/login" extends="provision-default">
+		<default-action-ref name="displayLoginAdmin" />
+		
+		<action name="displayLoginAdmin">
+			<result type="tiles">/login/loginAdmin</result>
+		</action>
+
+		<action name="loginAdmin" class="loginAction" method="loginAdmin">
+			<result type="redirectAction">
+				<param name="namespace">/provision</param>
+				<param name="actionName">main</param>
+			</result>
+			<result name="error" type="tiles">/login/loginAdmin</result>
+		</action>
+
+		<action name="logoutAdmin" class="loginAction" method="logoutAdmin">
+			<result type="redirectAction">
+				<param name="namespace">/login</param>
+				<param name="actionName">displayLoginAdmin</param>
+			</result>
+		</action>
+	</package>
+
+
+	<!-- 
+		admin user default package
+	 -->
+	<package name="admin-default" extends="provision-default">
+		<interceptors>
+			<interceptor name="adminUserAuthInterceptor" class="adminUserAuthInterceptor" />
+			<interceptor-stack name="adminAuthStack">
+				<interceptor-ref name="adminUserAuthInterceptor" />
+			</interceptor-stack>
+		</interceptors>
+		
+		<default-action-ref name="main" />
+		
+		<global-results>
+			<result name="login" type="tiles">/login/loginAdmin</result>
+		</global-results>
+
+		<action name="main" class="mainAction" method="main">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/main</result>
+		</action>
+	</package>
+
+	
+	<!-- 
+		provisioning functions
+	 -->
+	<package name="provision" namespace="/provision" extends="admin-default">
+		<action name="displayAddUserProfile" class="modifyProfileAction" method="displayAddUserProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+		</action>
+
+		<action name="save" class="modifyProfileAction" method="save">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="searchUser" type="redirectAction">
+			   <param name="namespace">/provision</param>
+			   <param name="actionName">searchUser</param>
+			</result>
+			<result name="error" type="tiles">/provision/modifyProfile</result>
+			<result name="input" type="tiles">/provision/modifyProfile</result>
+		</action>
+		
+		<action name="leaveModifyProfile" class="modifyProfileAction" method="leaveModifyProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result name="searchUser" type="redirectAction">
+			   <param name="namespace">/provision</param>
+			   <param name="actionName">searchUser</param>
+			</result>
+			<result name="searchProfile" type="redirectAction">
+			   <param name="namespace">/provision</param>
+			   <param name="actionName">searchProfile</param>
+			</result>
+		</action>
+		
+		<action name="searchUser" class="searchUserAction" method="searchUser">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/searchUser</result>
+			<result name="input" type="tiles">/provision/searchUser</result>
+			<result name="displayCreateProfile" type="redirectAction">
+			   <param name="namespace">/provision</param>
+			   <param name="actionName">displayCreateProfile</param>
+			   <param name="current.oid">${current.oid}</param>
+			</result>
+		</action>
+
+		<action name="displayCreateProfile" class="modifyProfileAction" method="displayCreateProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/modifyProfile</result>
+			<result name="input" type="tiles">/provision/modifyProfile</result>
+			<result name="searchUser" type="tiles">/provision/searchUser</result>
+		</action>
+		
+		<action name="searchProfile" class="searchProfileAction" method="searchProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/searchProfile</result>
+			<result name="input" type="tiles">/provision/searchProfile</result>
+			<result name="displayChangePermissionList" type="redirectAction">
+			   <param name="namespace">/provision</param>
+			   <param name="actionName">displayChangePermissionList</param>
+			   <param name="currentProfile.oid">${currentProfile.oid}</param>
+			</result>
+		</action>
+
+		<action name="displayDetail" class="modifyProfileAction" method="displayDetail">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/searchProfile</result>
+		</action>
+
+		<action name="displayChangePermissionList" class="modifyProfileAction" method="displayChangePermissionList">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="displayChangeUePermissionMode" class="modifyProfileAction" method="displayChangeUePermissionMode">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="displayChangeLocationDetectMode" class="modifyProfileAction" method="displayChangeLocationDetectMode">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="displayChangeProfile" class="modifyProfileAction" method="displayChangeProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="suspendProfile" class="searchProfileAction" method="suspendProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="resumeProfile" class="searchProfileAction" method="resumeProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="removeProfile" class="searchProfileAction" method="removeProfile">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/provision/searchProfile</result>
+		</action>
+	</package>
+
+	<!-- 
+		system administration functions
+	 -->
+	<package name="admin" namespace="/admin" extends="admin-default">
+		<!--
+			announcement management 
+		 -->
+		<action name="displayAnnouncement" class="announcementAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/announcement</result>
+			<result name="input" type="tiles">/admin/announcement</result>
+			<result name="error" type="tiles">/admin/announcement</result>
+		</action>
+		
+		<action name="searchAnnouncement" class="announcementAction" method="search">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/announcement</result>
+			<result name="input" type="tiles">/admin/announcement</result>
+			<result name="error" type="tiles">/admin/announcement</result>
+		</action>
+
+		<action name="saveAnnouncement" class="announcementAction" method="save">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/announcement</result>
+			<result name="input" type="tiles">/admin/announcement</result>
+			<result name="error" type="tiles">/admin/announcement</result>
+		</action>
+
+		<action name="deleteAnnouncement" class="announcementAction" method="delete">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/announcement</result>
+			<result name="input" type="tiles">/admin/announcement</result>
+			<result name="error" type="tiles">/admin/announcement</result>
+		</action>
+
+		<action name="editAnnouncement" class="announcementAction" method="edit">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/announcement</result>
+			<result name="input" type="tiles">/admin/announcement</result>
+			<result name="error" type="tiles">/admin/announcement</result>
+		</action>
+
+		<!-- 
+			ap zone management
+		 -->
+		 <action name="displayApZone" class="apZoneAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/apZone</result>
+			<result name="input" type="tiles">/admin/apZone</result>
+			<result name="error" type="tiles">/admin/apZone</result>
+		</action>
+		
+		<action name="searchApZone" class="apZoneAction" method="search">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/apZone</result>
+			<result name="input" type="tiles">/admin/apZone</result>
+			<result name="error" type="tiles">/admin/apZone</result>
+		</action>
+
+		<action name="saveApZone" class="apZoneAction" method="save">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/apZone</result>
+			<result name="input" type="tiles">/admin/apZone</result>
+			<result name="error" type="tiles">/admin/apZone</result>
+		</action>
+
+		<action name="deleteApZone" class="apZoneAction" method="delete">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/apZone</result>
+			<result name="input" type="tiles">/admin/apZone</result>
+			<result name="error" type="tiles">/admin/apZone</result>
+		</action>
+
+		<action name="editApZone" class="apZoneAction" method="edit">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/apZone</result>
+			<result name="input" type="tiles">/admin/apZone</result>
+			<result name="error" type="tiles">/admin/apZone</result>
+		</action>
+		 
+		<!-- 
+			rnc management
+		 -->
+		 <action name="displayRnc" class="rncAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/rnc</result>
+			<result name="input" type="tiles">/admin/rnc</result>
+			<result name="error" type="tiles">/admin/rnc</result>
+		</action>
+		
+		<action name="searchRnc" class="rncAction" method="search">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/rnc</result>
+			<result name="input" type="tiles">/admin/rnc</result>
+			<result name="error" type="tiles">/admin/rnc</result>
+		</action>
+
+		<action name="saveRnc" class="rncAction" method="save">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/rnc</result>
+			<result name="input" type="tiles">/admin/rnc</result>
+			<result name="error" type="tiles">/admin/rnc</result>
+		</action>
+
+		<action name="deleteRnc" class="rncAction" method="delete">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/rnc</result>
+			<result name="input" type="tiles">/admin/rnc</result>
+			<result name="error" type="tiles">/admin/rnc</result>
+		</action>
+
+		<action name="editRnc" class="rncAction" method="edit">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/rnc</result>
+			<result name="input" type="tiles">/admin/rnc</result>
+			<result name="error" type="tiles">/admin/rnc</result>
+		</action>
+		 
+		<!-- 
+			userLog management
+		 -->
+		 <action name="displayUserLog" class="userLogAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/userLog</result>
+			<result name="input" type="tiles">/admin/userLog</result>
+			<result name="error" type="tiles">/admin/userLog</result>
+		</action>
+		
+		<action name="searchUserLog" class="userLogAction" method="search">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/userLog</result>
+			<result name="input" type="tiles">/admin/userLog</result>
+			<result name="error" type="tiles">/admin/userLog</result>
+		</action>
+
+		<!-- 
+			system configuration
+		 -->
+		<action name="displayConfig" class="configAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applyProvisionConfig" class="configAction" method="applyProvisionConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applyFetTranslatorConfig" class="configAction" method="applyFetTranslatorConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applyFlowControlConfig" class="configAction" method="applyFlowControlConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applyNedbConfig" class="configAction" method="applyNedbConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="executNedbCellBatchImport" class="configAction" method="executNedbCellBatchImport">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="executApmExport" class="configAction" method="executApmExport">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applySchedulingConfig" class="configAction" method="applySchedulingConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="applyExceptionHandlerConfig" class="configAction" method="applyExceptionHandlerConfig">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<action name="testExceptionHandlerFtpConnection" class="configAction" method="testExceptionHandlerFtpConnection">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/config</result>
+			<result name="input" type="tiles">/admin/config</result>
+			<result name="error" type="tiles">/admin/config</result>
+		</action>
+		
+		<!-- 
+			adminUser management
+		 -->
+		 <action name="displayAdminUser" class="adminUserAction" method="display">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+		
+		<action name="searchAdminUser" class="adminUserAction" method="search">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+
+		<action name="saveAdminUser" class="adminUserAction" method="save">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+
+		<action name="deleteAdminUser" class="adminUserAction" method="delete">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+
+		<action name="editAdminUser" class="adminUserAction" method="edit">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+		 
+		<action name="savePermissions" class="adminUserAction" method="savePermissions">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="adminAuthStack" />
+			<result type="tiles">/admin/adminUser</result>
+			<result name="input" type="tiles">/admin/adminUser</result>
+			<result name="error" type="tiles">/admin/adminUser</result>
+		</action>
+	</package>
+	
+</struts>

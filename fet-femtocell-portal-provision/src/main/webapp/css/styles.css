@@ -1,0 +1,83 @@
+@CHARSET "UTF8";
+
+body {
+	color: #292929;
+	margin: 0px;
+	font-size: 8pt;
+	font-family: 'Arial';
+}
+
+a {
+	text-decoration: none;
+}
+
+.fetnetTitle {
+	color:#FFFFFF; 
+	font-size:18pt;
+}
+
+.baseFont {
+	color: #292929;
+	font-size: 8pt;
+	font-family: 'Arial';
+}
+
+.menuStyle {
+	line-height: 135%;
+}
+
+.headerText {
+	color: #FFFFFF;
+}
+
+.loadingMessage {
+	font-size: 8pt;
+	color: #777777;
+}
+
+.noborder {
+	border-width: 0;
+	border-spacing: 0;
+	border-collapse: collapse;
+	border-spacing: 10px;
+}
+
+.grayBorder {
+	border-style: solid;
+	border-color: #DDDDDD;
+	border-width: 1px;
+	border-spacing: 10px;
+	padding: 10px;
+}
+
+.searchResultTable {
+	border-style: solid;
+	border-color: #DDDDDD;
+	border-width: 1px;
+	border-spacing: 0px;
+	border-collapse: collapse;
+	margin: 0px;
+}
+
+.searchResultTableHeader {
+	background-color: #EEEEFF;
+	text-align: center;
+}
+
+.verticalDataTableCaption {
+	background-color: #EEEEFF;
+	text-align: right;
+}
+
+.announcementTitle {
+	color: #333399;
+	font-size: 8pt;
+	cursor: pointer;
+	word-wrap: break-word;
+}
+	
+.announcementContent {
+	color: #555555;
+	font-size: 8pt;
+	white-space: pre-line;
+}

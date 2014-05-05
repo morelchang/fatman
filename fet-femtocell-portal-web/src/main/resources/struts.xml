@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.custom.i18n.resources" value="messages"></constant>
+	<constant name="struts.devMode" value="false" />
+
+	<!--
+		provision system global default package, for both use of femtouser and adminuser 
+	-->
+	<package name="provision-default" extends="struts-default">
+		<result-types>
+			<result-type name="tiles"
+				class="org.apache.struts2.views.tiles.TilesResult"></result-type>
+		</result-types>
+
+		<interceptors>
+			<interceptor name="exceptionNotificationInterceptor" class="exceptionNotificationInterceptor" />
+			<interceptor-stack name="exceptionNotificationStack">
+				<interceptor-ref name="exceptionNotificationInterceptor" />
+			</interceptor-stack>
+		</interceptors>
+		
+		<global-results>
+			<result name="systemError" type="tiles">/error/error</result>
+			<result name="ssoLogin" type="redirect">${ssoLoginUrl}</result>
+			<result name="ssoNoFemtoService" type="tiles">/login/noFemtoService</result>
+			<result name="login" type="tiles">/login/loginFemtoUser</result>
+		</global-results>
+		
+		<global-exception-mappings>
+			<exception-mapping result="error" exception="tw.com.mds.fet.femtocellportal.core.ServiceException" />
+			<exception-mapping result="systemError" exception="java.lang.Exception" />
+		</global-exception-mappings>
+	</package>
+
+
+	<!-- 
+		femto user login function
+	 -->
+	<package name="loginFemtoUser" namespace="/loginFemtoUser" extends="provision-default">
+		<default-action-ref name="displayLoginFemtoUser" />
+		
+		<action name="displayLoginFemtoUser">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<result type="tiles">/login/loginFemtoUser</result>
+		</action>
+
+		<action name="loginFemtoUser" class="femtoUserLoginAction" method="loginFemtoUser">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<result type="redirectAction">
+				<param name="namespace">/femtouser</param>
+				<param name="actionName">main</param>
+			</result>
+			<result name="error" type="tiles">/login/loginFemtoUser</result>
+			<result name="ssoLogin" type="redirect">${ssoLoginUrl}</result>
+		</action>
+
+		<action name="logoutFemtoUser" class="femtoUserLoginAction" method="logoutFemtoUser">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<result type="redirectAction">
+			   <param name="namespace">/loginFemtoUser</param>
+			   <param name="actionName">displayLoginFemtoUser</param>
+			</result>
+		</action>
+	</package>
+
+
+	<!-- 
+		femto user default package
+	 -->
+	<package name="femtouser-default" extends="provision-default">
+		<interceptors>
+			<interceptor name="femtoUserAuthInterceptor" class="femtoUserAuthInterceptor" />
+			<interceptor-stack name="femtoUserAuthStack">
+				<interceptor-ref name="femtoUserAuthInterceptor" />
+			</interceptor-stack>
+		</interceptors>
+		
+		<default-action-ref name="main" />
+		
+		<global-results>
+			<!-- configure sso login page -->
+			<result name="ssoLogin" type="redirect">${ssoLoginUrl}</result>
+			<result name="ssoNoFemtoService" type="tiles">/login/noFemtoService</result>
+			<result name="login" type="tiles">/login/loginFemtoUser</result>
+		</global-results>
+		
+		<action name="main" class="mainAction" method="main">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="femtoUserAuthStack" />
+			<result type="tiles">/femtouser/main</result>
+		</action>
+	</package>
+	
+	<!-- 
+		femto user functions
+	 -->
+	<package name="femtouser" namespace="/femtouser" extends="femtouser-default">
+		<default-action-ref name="displayUserProfiles" />
+	
+		<action name="displayUserProfiles" class="searchProfileAction" method="displayUserProfiles">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="femtoUserAuthStack" />
+			<result type="tiles">/provision/searchProfile</result>
+		</action>
+		
+		<action name="displayChangePermissionListByFemtoUser" class="modifyProfileAction" 
+				method="displayChangePermissionListByFemtoUser">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="femtoUserAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/modifyProfile</result>
+		</action>
+		
+		<action name="save" class="modifyProfileAction" method="savePermissionList">
+			<interceptor-ref name="exceptionNotificationStack" />
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="femtoUserAuthStack" />
+			<result type="tiles">/provision/modifyProfile</result>
+			<result name="error" type="tiles">/provision/modifyProfile</result>
+		</action>
+	</package>
+
+</struts>

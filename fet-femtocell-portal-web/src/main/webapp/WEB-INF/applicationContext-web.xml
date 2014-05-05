@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/applicationContext.properties" />
+	</bean>
+	
+	<!-- web actions -->
+	<bean id="femtoUserLoginAction" class="tw.com.mds.fet.femtocellportal.web.FemtoUserLoginAction"
+			scope="request" parent="identityAction">
+	</bean>
+	
+	<bean id="mainAction" class="tw.com.mds.fet.femtocellportal.web.MainAction"
+			scope="request" parent="identityAction">
+	</bean>
+	
+	<bean id="searchProfileAction" class="tw.com.mds.fet.femtocellportal.web.SearchProfileAction"
+			scope="request" parent="identityAction">
+	</bean>
+
+	<bean id="modifyProfileAction" class="tw.com.mds.fet.femtocellportal.web.ModifyProfileAction"
+			scope="request" parent="identityAction">
+	</bean>
+
+	<bean id="identityAction" class="tw.com.mds.fet.femtocellportal.web.IdentityAction" abstract="true">
+		<property name="loggingService" ref="loggingServiceProxy" />
+		<property name="administrationService" ref="administrationServiceProxy" />
+		<property name="provisionService" ref="provisionServiceProxy" />
+	</bean>
+	
+	<!--
+		interceptors 
+	 -->
+	<bean id="exceptionNotificationInterceptor" class="tw.com.mds.fet.femtocellportal.web.interceptor.ExceptionNotificationInterceptor">
+		<property name="exceptionHandler" ref="exceptionHandler" />
+	</bean>
+	
+	<bean id="exceptionHandler" class="tw.com.mds.fet.femtocellportal.core.impl.ExceptionHandlerImpl">
+		<property name="config" ref="defaultExceptionHandlerConfig" />
+	</bean>
+	
+	<bean id="defaultExceptionHandlerConfig" class="tw.com.mds.fet.femtocellportal.core.impl.ExceptionHandlerConfig">
+		<property name="ftpIpAddress" value="210.241.201.169" />
+		<property name="ftpLoginUser" value="tsssa" />
+		<property name="ftpLoginPassword" value="tsssa" />
+		<property name="ftpRemoteDir" value="./" />
+		<property name="errorCodeListValue" value="" />
+		<property name="callerListValue" value="" />
+	</bean>
+	
+	<bean id="femtoUserAuthInterceptor" class="tw.com.mds.fet.femtocellportal.web.interceptor.FemtoUserAuthInterceptor">
+		<property name="provisionService" ref="provisionServiceProxy" />
+	</bean>
+
+	<!-- hessian implemented service proxy -->
+	<!-- configure provision address -->
+	<bean id="provisionServiceProxy"
+		class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceUrl"
+			value="http://${provisionServer}/api/provision" />
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.ProvisionService" />
+		<property name="proxyFactory" ref="hessionProxyFactory" />
+	</bean>
+	
+	<bean id="administrationServiceProxy"
+		class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceUrl"
+			value="http://${provisionServer}/api/administration" />
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.AdministrationService" />
+		<property name="proxyFactory" ref="hessionProxyFactory" />
+	</bean>
+	
+	<bean id="loggingServiceProxy"
+		class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceUrl"
+			value="http://${provisionServer}/api/logging" />
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.LoggingService" />
+		<property name="proxyFactory" ref="hessionProxyFactory" />
+	</bean>
+	
+	<bean id="hessionProxyFactory" class="com.caucho.hessian.client.HessianProxyFactory">
+		<property name="hessian2Request" value="false" />
+		<property name="hessian2Reply" value="false" />
+		<property name="overloadEnabled" value="true" />
+	</bean>
+</beans>

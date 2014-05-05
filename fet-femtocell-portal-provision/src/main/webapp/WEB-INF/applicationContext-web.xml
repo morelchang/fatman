@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="tw.com.mds.fet.femtocellportal.web" />
+	
+	<!-- web proxy configuration -->
+	<bean id="administration"
+		class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.AdministrationService" />
+		<property name="service" ref="administrationService" />
+		<property name="serializerFactory" ref="hessianSerializerFactory" />
+	</bean>
+	
+	<bean id="provision"
+		class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.ProvisionService" />
+		<property name="service" ref="provisionService" />
+		<property name="serializerFactory" ref="hessianSerializerFactory" />
+	</bean>
+	
+	<bean id="logging"
+		class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="serviceInterface"
+			value="tw.com.mds.fet.femtocellportal.core.LoggingService" />
+		<property name="service" ref="loggingService" />
+		<property name="serializerFactory" ref="hessianSerializerFactory" />
+	</bean>
+	
+	<bean id="hessianSerializerFactory" class="tw.com.mds.hessian.DelegatingSerializerFactory">
+		<property name="delegateFactories">
+			<list>
+				<bean class="tw.com.mds.hessian.HibernateSerializerFactory"></bean>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- web actions -->
+	<bean id="searchProfileAction" class="tw.com.mds.fet.femtocellportal.web.SearchProfileAction"
+			scope="session" parent="identityAction">
+		<property name="provisionService" ref="provisionService" />
+	</bean>
+	
+	<bean id="searchUserAction" class="tw.com.mds.fet.femtocellportal.web.SearchUserAction"
+			scope="session" parent="identityAction">
+		<property name="provisionService" ref="provisionService" />
+	</bean>
+	
+	<bean id="modifyProfileAction" class="tw.com.mds.fet.femtocellportal.web.ModifyProfileAction"
+			scope="session" parent="identityAction">
+		<property name="provisionService" ref="provisionService" />
+	</bean>
+	
+	<bean id="loginAction" class="tw.com.mds.fet.femtocellportal.web.LoginAction"
+			scope="session" parent="identityAction">
+		<property name="provisionService" ref="provisionService" />
+	</bean>
+
+	<bean id="configAction" class="tw.com.mds.fet.femtocellportal.web.ConfigAction"
+			scope="session" parent="identityAction">
+	</bean>
+	
+	<bean id="announcementAction" class="tw.com.mds.fet.femtocellportal.web.AnnouncementAction"
+			scope="session" parent="identityAction">
+	</bean>
+	
+	<bean id="apZoneAction" class="tw.com.mds.fet.femtocellportal.web.ApZoneAction"
+			scope="session" parent="identityAction">
+		<property name="provisionService" ref="provisionService" />
+	</bean>
+	
+	<bean id="rncAction" class="tw.com.mds.fet.femtocellportal.web.RncAction"
+			scope="session" parent="identityAction">
+		<property name="nedbService" ref="nedbService" />
+	</bean>
+	
+	<bean id="userLogAction" class="tw.com.mds.fet.femtocellportal.web.UserLogAction"
+			scope="session" parent="identityAction">
+	</bean>
+	
+	<bean id="adminUserAction" class="tw.com.mds.fet.femtocellportal.web.AdminUserAction"
+			scope="session" parent="identityAction">
+	</bean>
+	
+	<bean id="mainAction" class="tw.com.mds.fet.femtocellportal.web.MainAction"
+			scope="session" parent="identityAction">
+	</bean>
+	
+	<bean id="identityAction" class="tw.com.mds.fet.femtocellportal.web.IdentityAction" abstract="true">
+		<property name="administrationService" ref="administrationService" />
+		<property name="loggingService" ref="loggingService" />
+	</bean>
+	
+	<!--
+		authenticator interceptor 
+	 -->
+	<bean id="adminUserAuthInterceptor" class="tw.com.mds.fet.femtocellportal.web.interceptor.AdminUserAuthInterceptor">
+	</bean>
+</beans>

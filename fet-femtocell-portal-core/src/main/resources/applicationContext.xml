@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	<!-- 
+		spring configuration 
+	-->
+	<context:annotation-config />
+	
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:applicationContext-dev.properties" />
+	</bean>
+	
+	
+	<!-- 
+		exception handling configuration (AOP based)
+	 -->
+	<bean id="exceptionHandler" class="tw.com.mds.fet.femtocellportal.core.impl.ExceptionHandlerImpl"
+		init-method="init">
+		<property name="exceptionHandlerConfigDao" ref="exceptionHandlerConfigDao" />
+		<property name="config" ref="defaultExceptionHandlerConfig" />
+	</bean>
+	
+	<bean id="defaultExceptionHandlerConfig" class="tw.com.mds.fet.femtocellportal.core.impl.ExceptionHandlerConfig">
+		<property name="ftpIpAddress" value="210.241.201.169" />
+		<property name="ftpLoginUser" value="tsssa" />
+		<property name="ftpLoginPassword" value="tsssa" />
+		<property name="ftpRemoteDir" value="./" />
+	</bean>
+	
+	<bean id="exceptionHandlerConfigDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaExceptionHandlerConfigDao">
+	</bean>
+	
+	<bean id="exceptionNotifyAdvice" class="tw.com.mds.fet.femtocellportal.core.ExceptionNotifyAspect">
+		<property name="exceptionHandler" ref="exceptionHandler" />
+	</bean>
+
+	<aop:config>
+		<aop:aspect ref="exceptionNotifyAdvice">
+			<aop:pointcut id="provisionPointcut" 
+				expression="within(tw.com.mds.fet.femtocellportal.core.impl.ProvisionServiceImpl) and execution(public * *(..))" />
+			<aop:pointcut id="nedbPointcut" 
+				expression="within(tw.com.mds.fet.femtocellportal.nedb.impl.NedbServiceImpl) and execution(public * *(..))" />
+			<aop:after-throwing method="noitify" pointcut-ref="provisionPointcut" throwing="e" />
+			<aop:after-throwing method="noitify" pointcut-ref="nedbPointcut" throwing="e" />
+		</aop:aspect>
+	</aop:config>
+
+	
+	<!-- initialization data loader -->
+	<bean id="dataLoadService" class="tw.com.mds.fet.femtocellportal.core.impl.DataLoadServiceImpl">
+		<!-- configure default ap zones -->
+		<property name="defaultApZoneList">
+			<list>
+				<value>Blind Spot Scenario</value>
+				<value>Compus Scenario</value>
+				<value>Enterprise Scenario(Close)</value>
+				<value>Enterprise Scenario(Open)</value>
+				<value>FNI</value>
+				<value>Home Scenario(Close)</value>
+				<value>Home Scenario(Open)</value>
+				<value>Hotspot Area Scenario</value>
+				<value>PC326</value>
+				<!-- 
+				<value>test4</value>
+				 -->
+			</list>
+		</property>
+		<!-- configure default admin accounts -->
+		<property name="defaultAdminUserList">
+			<list>
+				<value>admin,Administrator,admin,admin</value>
+			</list>
+		</property>
+		<property name="defaultRncList">
+			<list>
+				<value>101,PC01R</value>
+				<value>102,PC02R</value>
+				<value>103,PC03R</value>
+				<value>104,PC04R</value>
+				<value>105,PC05R</value>
+				<value>1101,PC01AG</value>
+				<value>201,TY01R</value>
+				<value>202,TY02R</value>
+				<value>203,TY03R</value>
+				<value>204,TY04R</value>
+				<value>205,TY05R</value>
+				<value>206,TY06R</value>
+				<value>207,TY07R</value>
+				<value>208,TY08R</value>
+				<value>209,TY09R</value>
+				<value>210,TY10R</value>
+				<value>211,TY11R</value>
+				<value>212,TY12R</value>
+				<value>213,TY13R</value>
+				<value>301,WK01R</value>
+				<value>302,WK02R</value>
+				<value>303,WK03R</value>
+				<value>304,WK04R</value>
+				<value>305,WK05R</value>
+				<value>306,WK06R</value>
+				<value>307,WK07R</value>
+				<value>308,WK08R</value>
+				<value>309,WK09R</value>
+				<value>310,WK10R</value>
+				<value>311,WK11R</value>
+				<value>312,WK12R</value>
+				<value>401,NH01R</value>
+				<value>402,NH02R</value>
+				<value>403,NH03R</value>
+				<value>404,NH04R</value>
+				<value>405,NH05R</value>
+				<value>421,WK21R</value>
+				<value>422,WK22R</value>
+				<value>423,WK23R</value>
+				<value>424,WK24R</value>
+				<value>425,WK25R</value>
+				<value>441,TM01R</value>
+				<value>442,TM02R</value>
+				<value>601,TC01R</value>
+				<value>602,TC02R</value>
+				<value>501,TD01R</value>
+				<value>502,TD02R</value>
+				<value>503,TD03R</value>
+				<value>504,TD04R</value>
+				<value>505,TD05R</value>
+				<value>506,TD06R</value>
+				<value>507,TD07R</value>
+				<value>508,TD08R</value>
+				<value>509,TD09R</value>
+				<value>510,TD10R</value>
+				<value>701,TN01R</value>
+				<value>702,TN02R</value>
+				<value>703,TN03R</value>
+				<value>704,TN04R</value>
+				<value>705,TN05R</value>
+				<value>721,TN21R</value>
+				<value>722,TN22R</value>
+				<value>723,TN23R</value>
+				<value>724,TN24R</value>
+				<value>801,KS01R</value>
+				<value>802,KS02R</value>
+				<value>803,KS03R</value>
+				<value>804,KS04R</value>
+				<value>805,KS05R</value>
+				<value>806,KS06R</value>
+				<value>807,KS07R</value>
+				<value>821,KS21R</value>
+				<value>822,KS22R</value>
+				<value>823,KS23R</value>
+				<value>824,KS24R</value>
+				<value>825,KS25R</value>
+				<value>826,KS26R</value>
+				<value>827,KS27R</value>
+				<value>999,EC01R</value>
+				<value>900,EC02R</value>
+				<value>902,EC04R</value>
+				<value>903,EC03R</value>
+				<value>904,EC05R</value>
+			</list>
+		</property>
+		<property name="defaultCellsFilePath" value="${defaultCellsFilePath}" />
+		<property name="apZoneDao" ref="apZoneDao" />
+		<property name="adminUserDao" ref="adminUserDao" />
+		<property name="cellDao" ref="cellDao" />
+		<property name="rncDao" ref="rncDao" />
+	</bean>
+	
+	
+	<!--
+		provision
+	-->
+	<!-- provision service -->
+	<bean id="provisionService" class="tw.com.mds.fet.femtocellportal.core.impl.ProvisionServiceImpl"
+		init-method="init">
+		<property name="femtoUserDao" ref="femtoUserDao" />
+		<property name="femtoProfileDao" ref="femtoProfileDao" />
+		<property name="adminUserDao" ref="adminUserDao" />
+		<property name="provisionConfigDao" ref="provisionConfigDao" />
+		<property name="translatorService" ref="${translatorService}" />
+		<property name="gisService" ref="${gisService}" />
+		<property name="ahrService" ref="${ahrService}" />
+		<property name="config" ref="defaultProvisionConfig" />
+	</bean>
+	
+	<bean id="defaultProvisionConfig" class="tw.com.mds.fet.femtocellportal.core.impl.ProvisionConfig">
+		<property name="defaultMaxUserEquipmentSize" value="4" />
+		<property name="enableSsoAuthentication" value="true" />
+		<property name="ssoLoginUrl" value="https://aptest.mobile.fetnet.net/service/femto/" />
+		<property name="ssoLogoutUrl" value="http://aptest.mobile.fetnet.net/logout/logout.jsp" />
+		<property name="ssoMsisdnHeaderKey" value="X-IBM-PVC-User" />
+		<property name="enableLocalAuthentication" value="true" />
+		<property name="defaultListAll" value="${defaultListAll}" />
+	</bean>
+	
+	<!-- administration service -->
+	<bean id="administrationService" class="tw.com.mds.fet.femtocellportal.core.impl.AdministrationServiceImpl">
+		<property name="generalDao" ref="generalDao" />
+		<property name="announcementDao" ref="announcementDao" />
+		<property name="apZoneDao" ref="apZoneDao" />
+		<property name="rncDao" ref="rncDao" />
+		<property name="userLogDao" ref="userLogDao" />
+		<property name="adminUserDao" ref="adminUserDao" />
+		<!-- this is for IdentityAction to get sig maintenance time only now! -->
+		<property name="configurableServices">
+			<list>
+				<ref bean="fetTranslatorService"/>
+			</list>
+		</property>
+		<property name="translatorService" ref="translatorService" />
+	</bean>
+	
+	<!-- batch service -->
+	<bean id="batchService" class="tw.com.mds.fet.femtocellportal.core.impl.BatchServiceImpl">
+		<property name="provisionService" ref="provisionService" />
+		<property name="nedbService" ref="nedbService" />
+	</bean>
+	
+	<!-- logging service -->
+	<bean id="loggingService" class="tw.com.mds.fet.femtocellportal.core.impl.LoggingServiceImpl">
+		<property name="userLogDao" ref="userLogDao" />
+	</bean>
+	
+	<!-- core dao -->
+	<bean id="announcementDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaAnnouncementDao">
+	</bean>
+	
+	<bean id="generalDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaGeneralDao">
+	</bean>
+	
+	<bean id="femtoUserDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaFemtoUserDao">
+	</bean>
+
+	<bean id="femtoProfileDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaFemtoProfileDao">
+	</bean>
+
+	<bean id="apZoneDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaApZoneDao">
+	</bean>
+	
+	<bean id="cellDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaCellDao">
+	</bean>
+	
+	<bean id="rncDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaRncDao">
+	</bean>
+	
+	<bean id="userLogDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaUserLogDao">
+	</bean>
+	
+	<bean id="adminUserDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaAdminUserDao">
+	</bean>
+	
+	<bean id="provisionConfigDao" class="tw.com.mds.fet.femtocellportal.core.impl.JpaProvisionConfigDao">
+	</bean>
+	
+	<!-- 
+		translator configuration 
+	-->
+	<!-- flow control -->
+	<!-- configure flow control timeout -->
+	<bean id="translatorService" class="tw.com.mds.fet.femtocellportal.translator.impl.SyncQueueDelegate">
+		<property name="controlJob" ref="translatorFlowControlService" />
+		<property name="waitTimeout" value="60000" />
+	</bean>
+	
+	<bean id="translatorFlowControlService"
+		class="tw.com.mds.fet.femtocellportal.translator.impl.QuartzTranslatorFlowControlServiceImpl"
+		init-method="init" destroy-method="destroy">
+		<property name="translatorService" ref="fetTranslatorService" />
+		<property name="scheduler" ref="scheduler" />
+		<property name="currentTrigger" ref="translatorFlowControlTrigger" />
+		<property name="flowControlConfigDao" ref="flowControlConfigDao" />
+		<property name="config" ref="defaultFlowControlConfig" />
+	</bean>
+
+	<bean id="flowControlConfigDao" class="tw.com.mds.fet.femtocellportal.translator.impl.JpaFlowControlConfigDao">
+	</bean>
+	
+	<bean id="defaultFlowControlConfig" class="tw.com.mds.fet.femtocellportal.translator.impl.FlowControlConfig">
+		<property name="enableRetry" value="true" />
+		<property name="executePerSecond" value="5" />
+		<property name="maxRertry" value="3" />
+	</bean>
+
+	<!-- SIG translator -->
+	<bean id="fetTranslatorService" class="tw.com.mds.fet.femtocellportal.translator.impl.FetTranslatorServiceImpl"
+		init-method="init">
+		<property name="fetTranslatorConfigDao" ref="fetTranslatorConfigDao" />
+		<property name="config" ref="defaultFetTranslatorConfig" />
+	</bean>
+		
+	<bean id="fetTranslatorConfigDao" class="tw.com.mds.fet.femtocellportal.translator.impl.JpaFetTranslaotrConfigDao">
+	</bean>
+	
+	<bean id="defaultFetTranslatorConfig" class="tw.com.mds.fet.femtocellportal.translator.impl.FetTranslatorConfig">
+		<property name="enableMaintananceTimeCheck" value="true" />
+		<property name="maintenanceHourFrom" value="1" />
+		<property name="maintenanceHourTo" value="2" />
+		<property name="sgwA004Url" value="http://10.64.209.60:58105/sigws_sit01/dispatcher" />
+		<property name="sgwA015Url" value="http://10.64.209.60:58105/sigws_sit01/dispatcher" />
+		<property name="userNameF" value="BH_FETMO" />
+		<property name="passwordF" value="BH_FETMO123" />
+		<property name="userIdF" value="BH_FETMO" />
+		<property name="channelIdF" value="NT" />
+		<property name="userNameK" value="FETFEMTO" />
+		<property name="passwordK" value="S1D2F3R4" />
+		<property name="entity" value="" />
+		<property name="xmlEncoding" value="BIG5" />
+	</bean>
+	
+	
+	<!-- 
+		GIS 
+	-->
+	<bean id="gisService" class="tw.com.mds.fet.femtocellportal.gis.impl.GisServiceImpl">
+		<property name="wsGetPositionByAddress" ref="wsGetPositionByAddress" />
+		<property name="wsGetReversePoi" ref="wsGetReversePoi" />
+		<property name="gisLocationLink" value="${gisImageUrl}" />
+		<property name="incorrectLocatingStates">
+			<list>
+				<value>UNABLE_TO_LOCATE</value>
+				<value>LOCATED_BY_CITY</value>
+				<value>LOCATED_BY_TOWN</value>
+				<value>STREET_UNRECOGNIZED</value>
+			</list>
+		</property>
+		<property name="cellDao" ref="cellDao" />
+		<property name="rncDao" ref="rncDao" />
+	</bean>
+	
+	<!-- configure gis webservice -->
+	<bean id="wsGetPositionByAddress" class="tw.com.mds.fet.femtocellportal.ws.AxisWebServiceBean">
+		<property name="endpoint" value="http://${gisIpAddress}/KwMap/KwMapService.asmx" />
+		<property name="namespace" value="http://kingwaytek.com/" />
+		<property name="soapActionUri" value="http://kingwaytek.com/getPositionbyAddress" />
+		<property name="operation" value="getPositionbyAddress" />
+		<property name="paramNames">
+			<list>
+				<value>Address</value>
+			</list>
+		</property>
+		<property name="paramTypes">
+			<list>
+				<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_STRING" />
+			</list>
+		</property>
+		<property name="returnType">
+			<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_STRING" />
+		</property>
+	</bean>
+	
+	<bean id="wsGetReversePoi" class="tw.com.mds.fet.femtocellportal.ws.AxisWebServiceBean">
+		<property name="endpoint" value="http://${gisIpAddress}/KwMap/KwMapService.asmx" />
+		<property name="namespace" value="http://kingwaytek.com/" />
+		<property name="soapActionUri" value="http://kingwaytek.com/getReversePOINew" />
+		<property name="operation" value="getReversePOINew" />
+		<property name="paramNames">
+			<list>
+				<value>strX</value>
+				<value>strY</value>
+				<value>frag</value>
+			</list>
+		</property>
+		<property name="paramTypes">
+			<list>
+				<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_STRING" />
+				<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_STRING" />
+				<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_INT" />
+			</list>
+		</property>
+		<property name="returnType">
+			<util:constant static-field="org.apache.axis.encoding.XMLType.XSD_STRING" />
+		</property>
+	</bean>
+
+	
+	<!-- 
+		AHR 
+	-->
+	<!-- configure ahr server -->
+	<bean id="ahrService" class="tw.com.mds.fet.femtocellportal.ahr.impl.AhrServiceImpl">
+		<!-- staging  -->
+		<property name="uri" value="${ahrServiceUrl}" />
+		<property name="interfaceVersion" value="1" />
+		<property name="defaultPlmnId" value="46601" />
+		<property name="defaultLocationDetectMode" value="THIRD_G" />
+		<!-- 
+		<property name="ignoringErrorCode">
+			<list>
+				<value>40011</value>
+			</list>
+		</property>
+		 -->
+	</bean>
+	
+	
+	<!-- 
+		NEDB 
+	-->
+	<bean id="nedbService" class="tw.com.mds.fet.femtocellportal.nedb.impl.NedbServiceImpl"
+		init-method="init">
+		<property name="dataSource" ref="${nedbDataSource}" />
+		<property name="provisionService" ref="provisionService" />
+		<property name="rncDao" ref="rncDao" />
+		<property name="cellDao" ref="cellDao" />
+		<property name="femtoProfileDao" ref="femtoProfileDao" />
+		<property name="apmRecordDao" ref="apmRecordDao" />
+		<property name="config" ref="defaultNedbConfig" />
+		<property name="nedbConfigDao" ref="nedbConfigDao" />
+	</bean>
+	
+	<bean id="defaultNedbConfig" class="tw.com.mds.fet.femtocellportal.nedb.impl.NedbConfig">
+		<property name="batchQueryCellSql" value="select CELL_ID, CELL_NAME, SYSTYPE, LAC, BSC_RNC_ID, RNC_NAME, LONGITUDE, LATITUDE, DIR, VEN, MCC, MNC from nedb.NE_STG_NOIS_CIB_DATA where VEN like '%3G%' order by CELL_ID" />
+		<property name="enableRncIdConsistencyCheck" value="true" />
+		<property name="enableRncNameConsistencyCheck" value="true" />
+		<property name="defaultPlmnId" value="46601" />
+		<property name="importApmFileGzip" value="true" />
+		<property name="importApmFileEncoding" value="utf8" />
+		<property name="exportFilePath" value="D:\\projects\\FET Femto\\interface\\APM\\aa.txt" />
+		<property name="exportNewLine" value="\r\n" />
+		<property name="exportSeparator" value="," />
+		<property name="exportDefaultRncId" value="1101" />
+		<property name="exportDefaultBeamDirection" value="0" />
+	</bean>
+	
+	<bean id="nedbConfigDao" class="tw.com.mds.fet.femtocellportal.nedb.impl.JpaNedbConfigDao">
+	</bean>
+	
+	<bean id="apmRecordDao" class="tw.com.mds.fet.femtocellportal.core.dao.impl.JpaApmRecordDao">
+	</bean>
+	
+	<!-- 
+	<bean id="nedbDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+		<property name="url"
+			value="jdbc:oracle:thin:@192.168.20.210:1521:nedb" />
+		<property name="username" value="femtouser"/>
+		<property name="password" value="femtofetuser"/>
+	</bean>
+	 -->
+	<bean id="nedbDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"
+		lazy-init="true">
+		<property name="jndiName" value="java:comp/env/jdbc/nedb" />
+		<property name="resourceRef" value="true" />
+	</bean>
+	
+
+	<!-- 
+		scheduling/batch related 
+	-->
+	<bean id="schedulingService" class="tw.com.mds.fet.femtocellportal.core.impl.SchedulingServiceImpl"
+		init-method="init">
+		<property name="scheduler" ref="scheduler" />
+		<property name="config" ref="defaultSchedulingConfig" />
+		<property name="schedulingConfigDao" ref="schedulingConfigDao" />
+		<property name="nedbSyncCellsTrigger" ref="nedbSyncCellsTrigger" />
+		<property name="nedbSyncFemtoProfilesTrigger" ref="nedbSyncFemtoProfilesTrigger" />
+	</bean>
+	
+	<bean id="schedulingConfigDao" class="tw.com.mds.fet.femtocellportal.core.impl.JpaSchedulingConfgiDao">
+	</bean>
+	
+	<bean id="defaultSchedulingConfig" class="tw.com.mds.fet.femtocellportal.core.impl.SchedulingConfig">
+		<property name="dailySyncCellsTime" value="01:00" />
+		<property name="dailySyncFemtoProfilesTime" value="03:00" />
+	</bean>
+	
+	<!-- default quartz scheduler -->
+	<bean name="scheduler"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="translatorFlowControlTrigger" />
+				<ref bean="nedbSyncCellsTrigger" />
+				<ref bean="nedbSyncFemtoProfilesTrigger" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- flow control job & trigger -->
+	<bean name="translatorFlowControlTrigger"
+		class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="repeatInterval" value="1000" />
+		<property name="startDelay" value="1000" />
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="translatorFlowControlService" />
+				<property name="targetMethod" value="execute" />
+				<property name="concurrent" value="true" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- NEDB sync cells job & trigger -->
+	<bean name="nedbSyncCellsTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="cronExpression" value="0 0 1 * * ?" />
+		<property name="jobDetail">
+			<bean id="nedbSyncCellsJobDetail"
+				class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="batchService" />
+				<property name="targetMethod" value="syncCells" />
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- NEDB sync femto-profiles job & trigger -->
+	<bean name="nedbSyncFemtoProfilesTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="cronExpression" value="0 0 3 * * ?" />
+		<property name="jobDetail">
+			<bean id="nedbSyncFemtoProfilesJobDetail"
+				class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="nedbService" />
+				<property name="targetMethod" value="syncFemtoProfiles" />
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+	</bean>
+	
+	
+	<!-- 
+		local database 
+	-->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+	</bean>
+	
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager" />
+		<property name="persistenceUnitName" value="femtocellportal" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="showSql" value="${showSql}" />
+				<property name="generateDdl" value="${generateDdl}" />
+				<property name="databasePlatform" value="${databasePlatform}" />
+			</bean>
+		</property>
+		<property name="jpaProperties">
+			<map>
+				<entry key="hibernate.format_sql" value="${hibernate.format_sql}" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="persistenceUnitManager"
+		class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+		<!-- 
+		<property name="persistenceXmlLocations">
+			<list>
+				<value>classpath:META-INF/persistence.xml</value>
+			</list>
+		</property>
+		 -->
+		<property name="defaultDataSource" ref="${defaultDataSource}" />
+	</bean>
+
+	<!-- local SQLServer database -->
+	<!-- 
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:jtds:sqlserver://10.76.39.41:1433/FEMTOCELL" />
+		<property name="username" value="sa"/>
+		<property name="password" value="p@ssw0rd"/>
+	</bean>
+	 -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"
+		lazy-init="true">
+		<property name="jndiName" value="java:comp/env/jdbc/femtocell" />
+		<property name="resourceRef" value="true" />
+	</bean>
+	
+	
+	
+	<!-- 
+		stub service for testing
+	 -->
+	<bean id="stubTranslatorService" class="tw.com.mds.fet.femtocellportal.translator.impl.StubTranslatorServiceImpl">
+		<property name="msisdnImsiMap">
+			<map>
+				<entry key="0936716102" value="466015100363212"></entry>
+				<entry key="0955928200" value="466015100363214"></entry>
+				<entry key="1234567890" value="466013500022175"></entry>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="stubAhrService" class="tw.com.mds.fet.femtocellportal.ahr.impl.StubAhrServiceImpl">
+	</bean>
+	
+	<bean id="stubGisService" class="tw.com.mds.fet.femtocellportal.gis.impl.StubGisServiceImpl">
+		<property name="gisLocationLink" value="${gisImageUrl}" />
+		<!-- 
+		<property name="cells">
+			<list>
+				<bean class="tw.com.mds.fet.femtocellportal.core.Cell">
+					<property name="cellId" value="32022" />
+					<property name="cellName" value="" />
+					<property name="dir" value="" />
+					<property name="lacId" value="0" />
+					<property name="mcc" value="" />
+					<property name="mnc" value="" />
+					<property name="plmId" value="46602" />
+					<property name="position">
+						<bean class="tw.com.mds.fet.femtocellportal.core.Position">
+							<property name="longitude" value="0" />
+							<property name="latitude" value="0" />
+						</bean>
+					</property>
+					<property name="rnc">
+						<bean class="tw.com.mds.fet.femtocellportal.core.Rnc">
+							<property name="rncId" value="902" />
+							<property name="rncName" value="" />
+						</bean>
+					</property>
+					<property name="type" value="ThreeG" />
+					<property name="ven" value="" />
+				</bean>
+			</list>
+		</property>
+		 -->
+	</bean>
+	
+	<!-- test database -->
+	<bean id="testDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:mem:." />
+		<!-- 
+		<property name="url" value="jdbc:hsqldb:file:testdb;shutdown=true" />
+		 -->
+		<property name="username" value="sa"/>
+		<property name="password" value=""/>
+	</bean>
+</beans>

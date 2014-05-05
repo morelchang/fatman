@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/femtoProvision">
+	<ResourceLink
+	    name="jdbc/femtocell" 
+	    global="jdbc/femtocell" 
+	    type="javax.sql.DataSource"/>
+	    
+	<ResourceLink
+	    name="jdbc/nedb" 
+	    global="jdbc/nedb" 
+	    type="javax.sql.DataSource"/>
+</Context>

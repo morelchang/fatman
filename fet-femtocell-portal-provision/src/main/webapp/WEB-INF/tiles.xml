@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+	<!-- layout definitions -->
+	<definition name="headerLayout" template="/pages/templates/headerLayout.jsp">
+	</definition>
+	
+	<definition name="menuLayout" template="/pages/templates/menuLayout.jsp">
+	</definition>
+	
+	
+	<!-- login -->
+	<definition name="/login/loginAdmin" extends="headerLayout">
+		<put-attribute name="content" value="/pages/login/login.jsp" />
+	</definition>
+
+	
+	<!-- provisioning -->
+	<definition name="/provision/main" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/main.jsp" />
+	</definition>
+	
+	<definition name="/provision/searchProfile" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/searchProfile.jsp" />
+	</definition>
+	
+	<definition name="/provision/searchUser" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/searchUser.jsp" />
+	</definition>
+	
+	<definition name="/provision/modifyProfile" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/modifyProfile.jsp" />
+	</definition>
+	
+	
+	<!-- admin -->
+	<definition name="/admin/announcement" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/announcement.jsp" />
+	</definition>
+	
+	<definition name="/admin/apZone" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/apZone.jsp" />
+	</definition>
+		
+	<definition name="/admin/rnc" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/rnc.jsp" />
+	</definition>
+	
+	<definition name="/admin/userLog" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/userLog.jsp" />
+	</definition>
+	
+	<definition name="/admin/adminUser" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/adminUser.jsp" />
+	</definition>
+	
+	<definition name="/admin/config" extends="menuLayout">
+		<put-attribute name="content" value="/pages/admin/config.jsp" />
+	</definition>
+	
+	<!-- error -->
+	<definition name="/error/error" extends="headerLayout">
+		<put-attribute name="content" value="/pages/error/error.jsp" />
+	</definition>
+</tiles-definitions>

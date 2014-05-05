@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+	<!-- layout definitions -->
+	<definition name="headerLayout" template="/pages/templates/headerLayout.jsp">
+	</definition>
+	
+	<definition name="menuLayout" template="/pages/templates/menuLayout.jsp">
+	</definition>
+	
+	
+	<!-- login -->
+	<definition name="/login/loginFemtoUser" extends="headerLayout">
+		<put-attribute name="content" value="/pages/login/loginFemtoUser.jsp" />
+	</definition>
+	
+	<definition name="/login/noFemtoService" extends="headerLayout">
+		<put-attribute name="content" value="/pages/login/noFemtoService.jsp" />
+	</definition>
+	
+	
+	<!-- femto user -->
+	<definition name="/femtouser/main" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/main.jsp" />
+	</definition>
+	
+	<definition name="/provision/searchProfile" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/searchProfile.jsp" />
+	</definition>
+
+	<definition name="/provision/modifyProfile" extends="menuLayout">
+		<put-attribute name="content" value="/pages/provision/modifyProfile.jsp" />
+	</definition>
+	
+	
+	<!-- error -->
+	<definition name="/error/error" extends="headerLayout">
+		<put-attribute name="content" value="/pages/error/error.jsp" />
+	</definition>
+</tiles-definitions>
